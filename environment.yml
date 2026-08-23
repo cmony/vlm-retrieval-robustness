@@ -1,0 +1,9 @@
+name: vlmrobust
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip>=24
+  - protobuf>=4.25,<7
+  - wget
+  - unzip

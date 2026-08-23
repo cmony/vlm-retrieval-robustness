@@ -1,0 +1,8 @@
+transformers==4.57.1
+numpy>=1.26,<3
+Pillow>=10.2,<13
+PyYAML>=6.0,<7
+safetensors>=0.4.3
+sentencepiece>=0.2
+huggingface-hub>=0.27
+protobuf>=4.25,<7

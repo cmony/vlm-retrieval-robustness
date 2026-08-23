@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this code or the released results, please cite the associated paper."
+title: "VLM Retrieval Robustness"
+type: software
+authors:
+  - family-names: "Yoo"
+    given-names: "Sang Hyun"
+year: 2026
+version: 1.0.0
+repository-code: "https://github.com/cmony/vlm-retrieval-robustness"

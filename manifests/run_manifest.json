@@ -1,0 +1,142 @@
+{
+  "protocol_version": "coco-retrieval-robustness-2026-08-09-v1",
+  "dataset_fingerprint": "1e5bd0a9def4676d63b70530ecbc5b0312b94c395b91a3b413d7d9078d6638b1",
+  "runs": [
+    {
+      "package_version": "0.1.0",
+      "started_at_utc": "2026-08-09T06:28:45.247370+00:00",
+      "python": "3.11.15 | packaged by conda-forge | (main, Jun 11 2026, 03:34:02) [GCC 14.3.0]",
+      "platform": "Linux-5.15.0-164-generic-x86_64-with-glibc2.35",
+      "workload": {
+        "images": 5000,
+        "captions": 25000,
+        "condition_runs_per_model": 35,
+        "models": 4,
+        "image_model_evaluations": 700000,
+        "text_model_evaluations": 100000
+      },
+      "models": [
+        {
+          "name": "clip_vit_b32",
+          "type": "clip",
+          "checkpoint": "openai/clip-vit-base-patch32"
+        },
+        {
+          "name": "clip_vit_b16",
+          "type": "clip",
+          "checkpoint": "openai/clip-vit-base-patch16"
+        },
+        {
+          "name": "blip_base",
+          "type": "blip",
+          "checkpoint": "Salesforce/blip-itm-base-coco"
+        },
+        {
+          "name": "siglip_base",
+          "type": "siglip",
+          "checkpoint": "google/siglip-base-patch16-224"
+        }
+      ],
+      "version_numpy": "2.4.6",
+      "version_PIL": "12.3.0",
+      "version_yaml": "6.0.3",
+      "version_torch": "2.11.0+cu128",
+      "version_transformers": "4.57.1",
+      "cuda_runtime": "12.8",
+      "gpu": "NVIDIA A100-SXM4-80GB",
+      "dataset_fingerprint": "1e5bd0a9def4676d63b70530ecbc5b0312b94c395b91a3b413d7d9078d6638b1",
+      "protocol_version": "coco-retrieval-robustness-2026-08-09-v1",
+      "source_fingerprint": "d35915859e4b3834d9d4b7d27cfc5b7f97dee2347e58175ee28fe53093c75d14",
+      "resolved_models": [
+        {
+          "name": "clip_vit_b32",
+          "checkpoint": "openai/clip-vit-base-patch32",
+          "resolved_revision": "3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268"
+        },
+        {
+          "name": "clip_vit_b16",
+          "checkpoint": "openai/clip-vit-base-patch16",
+          "resolved_revision": "57c216476eefef5ab752ec549e440a49ae4ae5f3"
+        },
+        {
+          "name": "blip_base",
+          "checkpoint": "Salesforce/blip-itm-base-coco",
+          "resolved_revision": "bed8ad38cb2d04a5a4bdf2d071b3c3c0a4aa724c"
+        }
+      ],
+      "software_fingerprint": "8014642dfe5b5abf65aebde4e6e6cf7cd1a5a41c31b626261e86ce45d356b51e",
+      "resolved_config_file": "resolved_config.yaml"
+    },
+    {
+      "package_version": "0.1.0",
+      "started_at_utc": "2026-08-09T08:07:56.515801+00:00",
+      "python": "3.11.15 | packaged by conda-forge | (main, Jun 11 2026, 03:34:02) [GCC 14.3.0]",
+      "platform": "Linux-5.15.0-164-generic-x86_64-with-glibc2.35",
+      "workload": {
+        "images": 5000,
+        "captions": 25000,
+        "condition_runs_per_model": 35,
+        "models": 4,
+        "image_model_evaluations": 700000,
+        "text_model_evaluations": 100000
+      },
+      "models": [
+        {
+          "name": "clip_vit_b32",
+          "type": "clip",
+          "checkpoint": "openai/clip-vit-base-patch32"
+        },
+        {
+          "name": "clip_vit_b16",
+          "type": "clip",
+          "checkpoint": "openai/clip-vit-base-patch16"
+        },
+        {
+          "name": "blip_base",
+          "type": "blip",
+          "checkpoint": "Salesforce/blip-itm-base-coco"
+        },
+        {
+          "name": "siglip_base",
+          "type": "siglip",
+          "checkpoint": "google/siglip-base-patch16-224"
+        }
+      ],
+      "version_numpy": "2.4.6",
+      "version_PIL": "12.3.0",
+      "version_yaml": "6.0.3",
+      "version_torch": "2.11.0+cu128",
+      "version_transformers": "4.57.1",
+      "cuda_runtime": "12.8",
+      "gpu": "NVIDIA A100-SXM4-80GB",
+      "dataset_fingerprint": "1e5bd0a9def4676d63b70530ecbc5b0312b94c395b91a3b413d7d9078d6638b1",
+      "protocol_version": "coco-retrieval-robustness-2026-08-09-v1",
+      "source_fingerprint": "d35915859e4b3834d9d4b7d27cfc5b7f97dee2347e58175ee28fe53093c75d14",
+      "resolved_models": [
+        {
+          "name": "clip_vit_b32",
+          "checkpoint": "openai/clip-vit-base-patch32",
+          "resolved_revision": "3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268"
+        },
+        {
+          "name": "clip_vit_b16",
+          "checkpoint": "openai/clip-vit-base-patch16",
+          "resolved_revision": "57c216476eefef5ab752ec549e440a49ae4ae5f3"
+        },
+        {
+          "name": "blip_base",
+          "checkpoint": "Salesforce/blip-itm-base-coco",
+          "resolved_revision": "bed8ad38cb2d04a5a4bdf2d071b3c3c0a4aa724c"
+        },
+        {
+          "name": "siglip_base",
+          "checkpoint": "google/siglip-base-patch16-224",
+          "resolved_revision": "7fd15f0689c79d79e38b1c2e2e2370a7bf2761ed"
+        }
+      ],
+      "software_fingerprint": "8014642dfe5b5abf65aebde4e6e6cf7cd1a5a41c31b626261e86ce45d356b51e",
+      "resolved_config_file": "resolved_config.yaml",
+      "completed_at_utc": "2026-08-09T08:31:45.256034+00:00"
+    }
+  ]
+}
