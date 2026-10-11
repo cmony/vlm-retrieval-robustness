@@ -14,6 +14,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_DIR = REPO_ROOT / "paper" / "figures"
 NATURAL_CSV = REPO_ROOT / "results" / "natural" / "condition_aggregate.csv"
 ROCOCO_CSV = REPO_ROOT / "results" / "rococo" / "rococo_results.csv"
+ROCOCO_RELEVANCE_CSV = REPO_ROOT / "results" / "rococo" / "rococo_relevance_crosstab.csv"
 
 MODELS = ["blip_base", "siglip_base", "clip_vit_b16", "clip_vit_b32"]
 MODEL_LABEL = {
@@ -223,9 +224,23 @@ def make_figure4(distorted: pd.DataFrame) -> None:
 
 
 def make_figure5() -> None:
-    data = pd.read_csv(ROCOCO_CSV)
-    text_data = data[data["attack"] == "text_injection"]
-    mixing = data[data["attack"] == "image_mixing"].set_index("model")
+    """Exact-item (light) and source-aware (solid, hatched) change in R@1.
+
+    Exact-item values come from results/rococo/rococo_results.csv; source-aware
+    values come from results/rococo/rococo_relevance_crosstab.csv, written by
+    scripts/revision/rococo_relevance.py.
+    """
+    from matplotlib.patches import Patch
+
+    exact = pd.read_csv(ROCOCO_CSV)
+    relevance = pd.read_csv(ROCOCO_RELEVANCE_CSV)
+    relevance = relevance[relevance["queries"] == "all"]
+    label_to_model = {label: model for model, label in MODEL_LABEL.items()}
+    relevance = relevance.assign(model=relevance["model"].map(label_to_model))
+    source_aware = relevance.set_index(["model", "perturbation"])["delta_source_aware"]
+    exact = exact.assign(perturbation=exact["perturbation"].replace({"mix_0.9": "image_mixing"}))
+    exact_delta = exact.set_index(["model", "perturbation"])["delta_r1"]
+
     perturbations = ["same_concept", "diff_concept", "rand_voca", "danger"]
     perturbation_labels = ["Same concept", "Different concept", "Random vocabulary", "Danger"]
     hatches = ["", "//", "..", "xx"]
@@ -235,43 +250,39 @@ def make_figure5() -> None:
     x = np.arange(len(perturbations))
     width = 0.19
     for index, model in enumerate(MODELS):
-        rows = text_data[text_data["model"] == model].set_index("perturbation")
-        values = [rows.loc[p, "delta_r1"] for p in perturbations]
-        ax.bar(
-            x + (index - 1.5) * width,
-            values,
-            width=width,
-            color=MODEL_COLOR[model],
-            hatch=hatches[index],
-            edgecolor="white",
-            linewidth=0.5,
-            label=MODEL_LABEL[model],
-            zorder=3,
-        )
+        positions = x + (index - 1.5) * width
+        ax.bar(positions, [exact_delta[(model, p)] for p in perturbations], width=width,
+               color=MODEL_COLOR[model], alpha=0.30, edgecolor="none", zorder=2)
+        ax.bar(positions, [source_aware[(model, p)] for p in perturbations], width=width,
+               color=MODEL_COLOR[model], hatch=hatches[index], edgecolor="white", linewidth=0.5,
+               label=MODEL_LABEL[model], zorder=3)
     ax.set_xticks(x, perturbation_labels, rotation=12, ha="right")
     ax.set_ylabel("Change in R@1 (image-to-text)")
     ax.set_title("(a) Caption injection", fontweight="bold")
     ax.axhline(0, color="0.35", linewidth=0.7)
     ax.grid(axis="y", color="0.88", zorder=0)
-    ax.legend(frameon=False, ncol=2, loc="lower left")
+    handles, _ = ax.get_legend_handles_labels()
+    handles += [Patch(facecolor="0.45", alpha=0.30, label="Exact-item (light)"),
+                Patch(facecolor="0.45", label="Source-aware (solid)")]
+    ax.legend(handles=handles, frameon=False, ncol=2, loc="lower left")
 
     ax = axes[1]
     x2 = np.arange(len(MODELS))
-    values = [mixing.loc[model, "delta_r1"] for model in MODELS]
-    ax.bar(
-        x2,
-        values,
-        color=[MODEL_COLOR[m] for m in MODELS],
-        hatch=hatches,
-        edgecolor="white",
-        linewidth=0.5,
-        zorder=3,
-    )
+    colors = [MODEL_COLOR[m] for m in MODELS]
+    sa = [source_aware[(m, "image_mixing")] for m in MODELS]
+    ax.bar(x2, [exact_delta[(m, "image_mixing")] for m in MODELS], 0.6, color=colors, alpha=0.30,
+           edgecolor="none", zorder=2)
+    ax.bar(x2, sa, 0.6, color=colors, hatch=hatches, edgecolor="white", linewidth=0.5, zorder=3)
+    for xi, value in zip(x2, sa):
+        offset = 0.008 if value >= 0 else -0.008
+        ax.text(xi, value + offset, f"{value:+.3f}", ha="center",
+                va="bottom" if value >= 0 else "top", fontsize=7.5)
     ax.set_xticks(x2, [MODEL_LABEL[m] for m in MODELS], rotation=18, ha="right")
     ax.set_ylabel("Change in R@1 (text-to-image)")
     ax.set_title("(b) Image mixing", fontweight="bold")
     ax.axhline(0, color="0.35", linewidth=0.7)
     ax.grid(axis="y", color="0.88", zorder=0)
+    ax.set_ylim(-0.32, 0.03)
     save_figure(fig, "figure5_revised")
 
 

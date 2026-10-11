@@ -29,10 +29,12 @@ tests/                      CPU-only unit tests
 artifacts/ranks/            140 compressed natural-distortion rank checkpoints
 artifacts/dataset_index.csv Frozen COCO evaluation order and fingerprint
 results/natural/            Corrected aggregate, bootstrap, contrast, and per-image results
-results/rococo/             Adapted RoCOCO summary results
+results/rococo/             Adapted RoCOCO summaries and relevance-policy decomposition
+results/revision/           Exposure audit, transition rates (resubmission analyses)
 manifests/                  Recorded configuration and execution environment
 paper/figures/              Figures generated from the released result tables
 scripts/                    RoCOCO, figure, and release-validation utilities
+scripts/revision/           CPU-only analyses added for the resubmission
 ```
 
 Model weights and COCO images are not redistributed. They are downloaded from
@@ -64,6 +66,8 @@ rococo=20
 rank_checkpoints=140
 per_image=720000
 figures=5
+exposure=8, exposure_contrasts=6, transitions=40
+relevance=24, relevance_identities=72, selfpair=12
 ```
 
 See [REPRODUCIBILITY.md](REPRODUCIBILITY.md) for rank-first reanalysis, full
@@ -88,6 +92,25 @@ distorted R@k - clean R@k = (F->S - S->F) / N
 ```
 
 for all 456 stored condition-direction-cutoff combinations.
+
+## Resubmission analyses
+
+The revised manuscript adds four analyses, all reproducible on a CPU. See
+[REPRODUCIBILITY.md](REPRODUCIBILITY.md#5-resubmission-analyses) for commands.
+
+| Manuscript | Script | Output |
+|---|---|---|
+| Table 5, exposure audit in both directions | `scripts/revision/exposure_audit.py` | `results/revision/exposure_audit.csv`, `exposure_gap_contrasts.csv` |
+| Table 1 counts, Table 2 F->S column | `scripts/revision/transition_rates.py` | `results/revision/transition_rates_family.csv` |
+| Table 4, relevance-policy cross-tabulation | `scripts/revision/rococo_relevance.py` | `results/rococo/rococo_relevance_crosstab.csv`, `rococo_selfpair_audit.csv` |
+| Figure 5 | `scripts/regenerate_paper_figures.py` | `paper/figures/figure5_revised.{pdf,png}` |
+
+In the RoCOCO analysis, exact-item relevance counts only the original ground
+truth as correct; source-aware relevance also accepts an injected candidate
+derived from the query's own ground truth. The mixing step of
+`scripts/rococo_only.py` can pair an image with itself (about 1.5 percent of
+images per seed); the decomposition reports results with and without those
+queries.
 
 ## Data and third-party assets
 
