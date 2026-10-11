@@ -41,6 +41,9 @@ Corrected stochastic sentinels:
   (CLIP ViT-B/16), -0.0014 (BLIP), -0.0016 (SigLIP)
 - Self-paired images per seed: 75, 71, 82 (seeds 1, 10, 100); only BLIP
   produces identical original and mixed embeddings, exactly on these images
+- Exact score ties are resolved in favour of the ground truth, as in
+  `scripts/rococo_only.py`; with this rule the exact-item values of the
+  decomposition reproduce `rococo_results.csv` for all 20 conditions
 
 ## Exposure audit (BLIP Karpathy-train overlap)
 

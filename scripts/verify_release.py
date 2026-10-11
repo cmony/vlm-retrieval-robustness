@@ -106,6 +106,17 @@ def main() -> None:
         require(abs(aware - f["delta_source_aware"]) < 1e-3, f"source-aware identity failed: {row}")
         require(f["F_to_orig"] == 0.0, f"gallery enlargement cannot recover original items: {row}")
         relevance_identities += 3
+    summary = {(r["model"], r["perturbation"]): r for r in rococo}
+    label_to_model = {"CLIP ViT-B/32": "clip_vit_b32", "CLIP ViT-B/16": "clip_vit_b16",
+                      "BLIP": "blip_base", "SigLIP": "siglip_base"}
+    for row in relevance:
+        if row["queries"] != "all":
+            continue
+        key = (label_to_model[row["model"]],
+               "mix_0.9" if row["perturbation"] == "image_mixing" else row["perturbation"])
+        require(abs(float(summary[key]["delta_r1"]) - float(row["delta_exact"])) < 1e-4,
+                f"decomposition exact-item change differs from rococo_results.csv: {row}")
+        relevance_identities += 1
     for row in selfpair:
         if row["model"] != "BLIP":
             continue

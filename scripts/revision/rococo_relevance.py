@@ -12,8 +12,11 @@ For every query the top-ranked item is classified as
   other     another original item,
 and cross-tabulated against the clean outcome (S = clean success, F = clean
 failure). Exact-item R@1 counts only ``orig``; source-aware R@1 also counts
-``own``. Exact score ties between an original and an injected item are broken
-in favour of the original.
+``own``. Exact score ties are resolved in favour of the ground truth, as in
+scripts/rococo_only.py: a query counts as ``orig`` when its best ground-truth
+score is at least the best score of every other gallery item. Such ties occur
+because 301 of the 25,010 reference captions repeat verbatim across images, and
+because some BLIP mixed copies embed identically to their originals.
 
 The mixing script pairs images inside shuffled batches of 64 with
 torch.randperm, which can return the identity; such self-paired images give a
@@ -88,29 +91,44 @@ def main() -> None:
 
         # caption injection, image-to-text
         s_gt = img @ gt.T
-        top_gt = s_gt.argmax(1)
-        clean_ok = owner[top_gt] == np.arange(n)
+        own_mask = owner[None, :] == np.arange(n)[:, None]
+        best_own_gt = np.where(own_mask, s_gt, -np.inf).max(1)
+        best_other_gt = np.where(own_mask, -np.inf, s_gt).max(1)
+        clean_ok = best_own_gt >= best_other_gt
+        adv_own_mask = adv_owner[None, :] == np.arange(n)[:, None]
         for pert in PERTURBATIONS:
             adv = np.load(cache / f"{model}_{pert}.npy").astype(np.float32)
             s_adv = img @ adv.T
-            injected = s_adv.max(1) > s_gt.max(1)
-            ta = s_adv.argmax(1)
-            cat = np.where(~injected, np.where(clean_ok, 0, 3),
-                           np.where(adv_owner[ta] == np.arange(n), 1, 2))
+            best_own_adv = np.where(adv_own_mask, s_adv, -np.inf).max(1)
+            best_other_adv = np.where(adv_own_mask, -np.inf, s_adv).max(1)
+            top_other = np.maximum(best_other_gt, np.maximum(best_own_adv, best_other_adv))
+            is_orig = best_own_gt >= top_other
+            # among non-original winners: own-source if it attains the top, else
+            # another injected caption, else another original caption
+            is_own = ~is_orig & (best_own_adv >= np.maximum(best_other_gt, best_other_adv))
+            is_other_inj = ~is_orig & ~is_own & (best_other_adv >= best_other_gt)
+            cat = np.where(is_orig, 0, np.where(is_own, 1, np.where(is_other_inj, 2, 3)))
             r = crosstab(clean_ok, cat)
             rows.append([LABEL[model], pert, "image_to_text", "all"] + [round(r[k], 4) for k in keys])
 
         # image mixing, text-to-image, pooled over seeds
         s_img = gt @ img.T
-        c_top = s_img.argmax(1)
-        c_ok = c_top == owner
+        own_score = s_img[np.arange(len(owner)), owner]
+        s_img_other = s_img.copy()
+        s_img_other[np.arange(len(owner)), owner] = -np.inf
+        c_ok = own_score >= s_img_other.max(1)
         cats, oks, selfq = [], [], []
         for seed in SEEDS:
             mix = np.load(cache / f"{model}_mix_mix_0.9_{seed}.npy").astype(np.float32)
             s_mix = gt @ mix.T
-            injected = s_mix.max(1) > s_img.max(1)
-            t = np.where(injected, s_mix.argmax(1), c_top)
-            cats.append(np.where(~injected, np.where(t == owner, 0, 3), np.where(t == owner, 1, 2)))
+            own_mix = s_mix[np.arange(len(owner)), owner]
+            s_mix_other = s_mix.copy()
+            s_mix_other[np.arange(len(owner)), owner] = -np.inf
+            best_other_img, best_other_mix = s_img_other.max(1), s_mix_other.max(1)
+            is_orig = own_score >= np.maximum(np.maximum(best_other_img, own_mix), best_other_mix)
+            is_own = ~is_orig & (own_mix >= np.maximum(best_other_img, best_other_mix))
+            is_other_inj = ~is_orig & ~is_own & (best_other_mix >= best_other_img)
+            cats.append(np.where(is_orig, 0, np.where(is_own, 1, np.where(is_other_inj, 2, 3))))
             oks.append(c_ok)
             is_self = part[seed] == np.arange(n)
             selfq.append(is_self[owner])

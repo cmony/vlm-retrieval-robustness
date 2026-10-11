@@ -67,7 +67,7 @@ rank_checkpoints=140
 per_image=720000
 figures=5
 exposure=8, exposure_contrasts=6, transitions=40
-relevance=24, relevance_identities=72, selfpair=12
+relevance=24, relevance_identities=92, selfpair=12
 ```
 
 See [REPRODUCIBILITY.md](REPRODUCIBILITY.md) for rank-first reanalysis, full
