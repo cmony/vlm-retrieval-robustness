@@ -1,0 +1,13 @@
+model,seed,self_paired_images,identical_embeddings,identical_and_self_paired,median_cos_original_vs_mix_non_self,median_cos_original_vs_mix_self
+BLIP,1,75,75,75,0.9864,1.0
+BLIP,10,71,71,71,0.9864,1.0
+BLIP,100,82,82,82,0.9866,1.0
+SigLIP,1,75,0,0,0.9811,0.9987
+SigLIP,10,71,0,0,0.9814,0.9988
+SigLIP,100,82,0,0,0.9816,0.9987
+CLIP ViT-B/16,1,75,0,0,0.9426,0.9685
+CLIP ViT-B/16,10,71,0,0,0.9432,0.9687
+CLIP ViT-B/16,100,82,0,0,0.9429,0.9654
+CLIP ViT-B/32,1,75,0,0,0.9306,0.955
+CLIP ViT-B/32,10,71,0,0,0.9313,0.955
+CLIP ViT-B/32,100,82,0,0,0.9313,0.9559

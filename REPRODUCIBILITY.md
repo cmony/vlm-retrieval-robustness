@@ -80,3 +80,22 @@ python scripts/regenerate_paper_figures.py
 ```
 
 The generated PDF and PNG figures are written to `paper/figures/`.
+
+## 5. Resubmission analyses
+
+These scripts need only the committed rank checkpoints (and, for Table 4, the
+RoCOCO embedding cache written by `scripts/rococo_only.py`). They run on a CPU.
+
+```bash
+cd scripts/revision
+python exposure_audit.py          # Table 5; downloads Karpathy split JSONs to cache/karpathy/
+python transition_rates.py        # Table 1 counts and Table 2 F->S column
+python rococo_relevance.py --rococo-root ../../rococo_run   # Table 4; needs rococo_run/cache and annotations
+cd ../..
+python scripts/regenerate_paper_figures.py                   # Figure 5 uses rococo_relevance_crosstab.csv
+python scripts/verify_release.py
+```
+
+`rococo_relevance.py` replays the generator calls of the mixing step to rebuild
+the partner map, so it requires `torch`. Exact score ties between an original
+item and an injected item are broken in favour of the original.

@@ -85,12 +85,54 @@ def main() -> None:
     figures = list((ROOT / "paper" / "figures").glob("figure*_revised.pdf"))
     require(len(figures) == 5, f"expected five paper figures, got {len(figures)}")
 
+    # Resubmission analyses (scripts/revision/)
+    revision = ROOT / "results" / "revision"
+    exposure = read_csv(revision / "exposure_audit.csv")
+    gap_contrasts = read_csv(revision / "exposure_gap_contrasts.csv")
+    transitions = read_csv(revision / "transition_rates_family.csv")
+    relevance = read_csv(ROOT / "results" / "rococo" / "rococo_relevance_crosstab.csv")
+    selfpair = read_csv(ROOT / "results" / "rococo" / "rococo_selfpair_audit.csv")
+    require(len(exposure) == 8, f"expected 8 exposure rows, got {len(exposure)}")
+    require(len(gap_contrasts) == 6, f"expected 6 exposure contrasts, got {len(gap_contrasts)}")
+    require(len(transitions) == 40, f"expected 40 transition rows, got {len(transitions)}")
+    require(len(relevance) == 24, f"expected 24 relevance rows, got {len(relevance)}")
+    require(len(selfpair) == 12, f"expected 12 self-pair audit rows, got {len(selfpair)}")
+    relevance_identities = 0
+    for row in relevance:
+        f = {k: float(v) for k, v in row.items() if k not in ("model", "perturbation", "direction", "queries")}
+        exact = -(f["S_to_own"] + f["S_to_other_inj"] + f["S_to_other"])
+        aware = f["F_to_own"] - f["S_to_other_inj"] - f["S_to_other"]
+        require(abs(exact - f["delta_exact"]) < 1e-3, f"exact identity failed: {row}")
+        require(abs(aware - f["delta_source_aware"]) < 1e-3, f"source-aware identity failed: {row}")
+        require(f["F_to_orig"] == 0.0, f"gallery enlargement cannot recover original items: {row}")
+        relevance_identities += 3
+    summary = {(r["model"], r["perturbation"]): r for r in rococo}
+    label_to_model = {"CLIP ViT-B/32": "clip_vit_b32", "CLIP ViT-B/16": "clip_vit_b16",
+                      "BLIP": "blip_base", "SigLIP": "siglip_base"}
+    for row in relevance:
+        if row["queries"] != "all":
+            continue
+        key = (label_to_model[row["model"]],
+               "mix_0.9" if row["perturbation"] == "image_mixing" else row["perturbation"])
+        require(abs(float(summary[key]["delta_r1"]) - float(row["delta_exact"])) < 1e-4,
+                f"decomposition exact-item change differs from rococo_results.csv: {row}")
+        relevance_identities += 1
+    for row in selfpair:
+        if row["model"] != "BLIP":
+            continue
+        require(row["identical_embeddings"] == row["identical_and_self_paired"] == row["self_paired_images"],
+                f"BLIP identical embeddings should coincide with self-paired images: {row}")
+
     print("RELEASE GATE PASSED")
     print(f"aggregate={len(aggregate)}, metrics={len(metrics)}, bootstrap={len(bootstrap)}")
     print(f"contrasts={len(contrasts)}, significant={significant}, rococo={len(rococo)}")
     print(
         f"transition_identities={transition_identities}, rank_checkpoints={len(rank_files)}, "
         f"per_image={per_image_rows}, figures={len(figures)}"
+    )
+    print(
+        f"exposure={len(exposure)}, exposure_contrasts={len(gap_contrasts)}, transitions={len(transitions)}, "
+        f"relevance={len(relevance)}, relevance_identities={relevance_identities}, selfpair={len(selfpair)}"
     )
 
 

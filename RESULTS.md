@@ -33,4 +33,23 @@ Corrected stochastic sentinels:
 - Caption-injection conditions: four per checkpoint
 - Image mixing: `0.9 I + 0.1 I'`, seeds 1, 10, and 100
 - Results are descriptive point estimates without bootstrap intervals
+- Relevance-policy decomposition: 24 rows (16 caption, 4 image mixing, 4 image
+  mixing excluding self-paired images)
+- Exact-item R@1 counts only original ground truth; source-aware R@1 also
+  counts injected candidates derived from the query's own ground truth
+- Image-mixing source-aware change: +0.0067 (CLIP ViT-B/32), +0.0078
+  (CLIP ViT-B/16), -0.0014 (BLIP), -0.0016 (SigLIP)
+- Self-paired images per seed: 75, 71, 82 (seeds 1, 10, 100); only BLIP
+  produces identical original and mixed embeddings, exactly on these images
+- Exact score ties are resolved in favour of the ground truth, as in
+  `scripts/rococo_only.py`; with this rule the exact-item values of the
+  decomposition reproduce `rococo_results.csv` for all 20 conditions
+
+## Exposure audit (BLIP Karpathy-train overlap)
+
+- Exposed / unexposed images: 3,799 / 1,201
+- Queries restricted to each subset; gallery is the full evaluation set
+- BLIP clean R@1 gap (exposed - unexposed): +0.0648 image-to-text,
+  +0.0626 text-to-image; all control-checkpoint intervals include zero
+- Bootstrap repetitions: 5,000; seed 2026; resampling within each subset
 
